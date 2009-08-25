@@ -13,11 +13,31 @@ public class SoundProber implements Runnable
 
     public boolean probing_done=false;
 
+    // constructor
     public SoundProber()
     {
+	// fire up thread
 	new Thread(this).start();
     }
 
+    public boolean probe_sound(String file,String type)
+    {
+	try {
+	    Player probe_player= Manager.createPlayer(getClass().getResourceAsStream(file), type);
+	    probe_player.realize();
+	    probe_player.prefetch();
+	    probe_player.setLoopCount(1);
+	    // TODO check if we need to actually .start() aka play the audio
+            probe_player.deallocate();
+	    probe_player.close();
+	}
+	catch (Exception e)  { 
+	    return false;
+	}	
+	return true;
+    }
+
+    // thread
     public void run()
     {
 	probing_done=true;
