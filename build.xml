@@ -22,7 +22,7 @@
 
 	<property name="wtk.midpapi" value="${lib_dir}/classes.zip"/> 	
 	
-	<target name="build" depends="cleaner,builddirs">
+	<target name="build" depends="builddirs">
 
 		<wtkbuild destdir="${build_dir}/classes" srcdir="${src_dir}" target="1.1" preverify="false"/>
 		<wtkjad
@@ -56,22 +56,18 @@
 	</target>
 
 	
-	<target name="clean">
-		<delete dir="${build_dir}"/> 
-	</target> 
+	<target name="builddirs" depends="clean">
 
-	<target name="cleaner">
-		<delete dir="${build_dir}"/> 
-		<delete file="${bin_dir}/*.ja*"/> 
-	</target> 
-
-	<target name="builddirs">
-		<delete dir="${build_dir}"/>
- 
-		<mkdir dir="${build_dir}"/> 
-		<mkdir dir="${build_dir}/classes"/> 
-		<mkdir dir="${build_dir}/bin"/>
+	  <mkdir dir="${bin_dir}"/>
+	  <mkdir dir="${build_dir}"/> 
+	  <mkdir dir="${build_dir}/classes"/> 
+	  <mkdir dir="${build_dir}/bin"/>
 	</target> 
 	
+	<target name="clean">
+	  <delete dir="${build_dir}"/> 
+	  <delete dir="${bin_dir}"/> 
+	</target> 
+
 
 </project>
