@@ -23,7 +23,7 @@ public class SoundProber implements Runnable
     public boolean probe_sound(String file,String type)
     {
 	try {
-	    Player probe_player= Manager.createPlayer(getClass().getResourceAsStream(file), type);
+	    Player probe_player= Manager.createPlayer(getClass().getResourceAsStream(file),"audio/"+ type);
 	    probe_player.realize();
 	    probe_player.prefetch();
 	    probe_player.setLoopCount(1);
@@ -40,6 +40,11 @@ public class SoundProber implements Runnable
     // thread
     public void run()
     {
+	wav_ok=probe_sound("snd.wav","x-wav");
+	mp3_16kbit_ok=probe_sound("snd_16kbit.mp3","mp3");
+	mp3_32kbit_ok=probe_sound("snd_32kbit.mp3","mp3");
+	mp3_64kbit_ok=probe_sound("snd_64kbit.mp3","mp3");
+	System.gc();
 	probing_done=true;
     }
 }
