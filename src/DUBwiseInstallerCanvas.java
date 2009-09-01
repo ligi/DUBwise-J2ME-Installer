@@ -22,6 +22,7 @@ public class DUBwiseInstallerCanvas
 
 
 
+
     String encoding="";
     String platform="";
     String locale="";
@@ -55,34 +56,53 @@ public class DUBwiseInstallerCanvas
     long free_mem;
     long total_mem;
 
+    public SoundProber sound_prober;
 
-    public String url_serialize()
+    public String result_as_url_params()
     {
+	return result_as(true);
+    }
+
+
+    public String result_as_text()
+    {
+	return result_as(false);
+    }
+
+    public String result_as(boolean url_format)
+    {
+	String d="\n";
+
+	if (url_format) d="&";
 	return 
-	    "encoding="+InstallHelper.urlEncode(encoding)+
-	    "&platform="+InstallHelper.urlEncode(platform)+
-	    "&locale="+InstallHelper.urlEncode(locale)+
-	    "&configuration="+InstallHelper.urlEncode(configuration)+
-	    "&profiles="+InstallHelper.urlEncode(profiles)+
-	    "&hostname="+InstallHelper.urlEncode(hostname)+
-	    "&location_api_version="+InstallHelper.urlEncode(location_api_version)+
-	    "&sensor_api_version="+InstallHelper.urlEncode(sensor_api_version)+
-	    "&comports="+InstallHelper.urlEncode(comports)+
-	    "&canvas_width="+InstallHelper.urlEncode(""+canvas_width)+
-	    "&canvas_height="+InstallHelper.urlEncode(""+canvas_height)+
-	    "&canvas_full_width="+InstallHelper.urlEncode(""+canvas_full_width)+
-	    "&canvas_full_height="+InstallHelper.urlEncode(""+canvas_full_height)+
-	    "&rms_avail="+InstallHelper.urlEncode(""+rms_avail)+
-	    "&free_mem="+InstallHelper.urlEncode(""+free_mem)+
-	    "&total_mem="+InstallHelper.urlEncode(""+total_mem)+
-	    (symbian?"&symbian=true":"")+
-	    (sensorapi?"&sensorapi=true":"")+
-	    (fileapi?"&fileapi=true":"")+
-	    (cldc11?"&cldc11=true":"")+
-	    (bluetooth?"&bluetooth=true":"")+
-	    (devicecontrol?"&devicecontrol=true":"")+
-	    (jsr179?"&jsr179=true":"")+
-	    "";
+	    "encoding="+InstallHelper.Conditional_URL_Encode(encoding, url_format)+d+
+	    "platform="+InstallHelper.Conditional_URL_Encode(platform, url_format)+d+
+	    "locale="+InstallHelper.Conditional_URL_Encode(locale, url_format)+d+
+	    "configuration="+InstallHelper.Conditional_URL_Encode(configuration, url_format)+d+
+	    "profiles="+InstallHelper.Conditional_URL_Encode(profiles, url_format)+d+
+	    "hostname="+InstallHelper.Conditional_URL_Encode(hostname, url_format)+d+
+	    "location_api_version="+InstallHelper.Conditional_URL_Encode(location_api_version, url_format)+d+
+	    "sensor_api_version="+InstallHelper.Conditional_URL_Encode(sensor_api_version, url_format)+d+
+	    "comports="+InstallHelper.Conditional_URL_Encode(comports, url_format)+d+
+	    "canvas_width="+InstallHelper.Conditional_URL_Encode(""+canvas_width, url_format)+d+
+	    "canvas_height="+InstallHelper.Conditional_URL_Encode(""+canvas_height, url_format)+d+
+	    "canvas_full_width="+InstallHelper.Conditional_URL_Encode(""+canvas_full_width, url_format)+d+
+	    "canvas_full_height="+InstallHelper.Conditional_URL_Encode(""+canvas_full_height, url_format)+d+
+	    "rms_avail="+InstallHelper.Conditional_URL_Encode(""+rms_avail, url_format)+d+
+	    "free_mem="+InstallHelper.Conditional_URL_Encode(""+free_mem, url_format)+d+
+	    "total_mem="+InstallHelper.Conditional_URL_Encode(""+total_mem, url_format)+d+
+	    "snd_wav="+sound_prober.wav_ok+d+
+	    "snd_mp3_16kbit="+sound_prober.mp3_16kbit_ok+d+
+	    "snd_mp3_32kbit="+sound_prober.mp3_32kbit_ok+d+
+	    "snd_mp3_64kbit="+sound_prober.mp3_64kbit_ok+d+
+	    (symbian?d+"symbian=true":"")+
+	    (sensorapi?d+"sensorapi=true":"")+
+	    (fileapi?d+"fileapi=true":"")+
+	    (cldc11?d+"cldc11=true":"")+
+	    (bluetooth?d+"bluetooth=true":"")+
+	    (devicecontrol?d+"devicecontrol=true":"")+
+	    (jsr179?d+"jsr179=true":"");
+
     }
 
 
@@ -108,6 +128,7 @@ public class DUBwiseInstallerCanvas
 
     {
 	root=_root;
+	sound_prober=new SoundProber();
 	new Thread(this).start();
     }
 
