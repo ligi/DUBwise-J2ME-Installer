@@ -107,8 +107,15 @@ public final class InstallHelper
 
 
 
+    static public String Conditional_URL_Encode(String sUrl,boolean condition)
+    {
+	if (condition) 
+	    return URL_Encode(sUrl);
+	else
+	    return sUrl;
+    }
 
-    static public String urlEncode(String sUrl)   
+    static public String URL_Encode(String sUrl)   
     {  
 	if (sUrl==null) return "";
          StringBuffer urlOK = new StringBuffer();  
