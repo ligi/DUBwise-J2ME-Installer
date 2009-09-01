@@ -84,7 +84,7 @@ public class DUBwiseProps
 	if (openlapi) bval2|=2;
 
 
-	return ""+bval0+""+bval1+""+res_select+""+sound_select+""+firmware_select;
+	return ""+bval0+""+bval1+""+res_select+""+sound_select+""+firmware_select +""+bval2;
     }
     public boolean set_code(String code)
     {
