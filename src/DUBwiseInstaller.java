@@ -37,7 +37,7 @@ public class DUBwiseInstaller
     public Display display;
     public  DUBwiseInstallerCanvas canvas;
     private DUBwiseProps props;
-    public SoundProber sound_prober;
+
 
     public boolean app_running=false;  // to prevent 2 instances
 
@@ -53,6 +53,8 @@ public class DUBwiseInstaller
 
     Form installoptions_form;
     Form install_form;
+    Form device_info_form;
+    Form expert_form;
 
 
     ChoiceGroup installmethod_choice;
@@ -63,9 +65,6 @@ public class DUBwiseInstaller
 
     ChoiceGroup optional_features_choice;
 
-
-    Form expert_form;
-
     ChoiceGroup res_choice;
     ChoiceGroup device_features_choice;
     ChoiceGroup installsrc_choice;
@@ -73,6 +72,7 @@ public class DUBwiseInstaller
 
     Command ok_command;
     Command back_command;
+    Command exit_command;
 
     String device_code;
     String install_code;
@@ -83,7 +83,7 @@ public class DUBwiseInstaller
 
        if (app_running)return;
        display  = Display.getDisplay(this);
-       sound_prober=new SoundProber();
+
        canvas=new  DUBwiseInstallerCanvas(this);
 
        // fire up canvas
@@ -107,13 +107,20 @@ public class DUBwiseInstaller
     // fire up browser for online install
     public void run()
     {
+	Alert browser_start_alert = new Alert("Information", "opening browser - please wait", null, AlertType.INFO);
 
-	device_code=InstallHelper.post_http("http://dubwise-download.appspot.com/device_info",canvas.url_serialize());
+	browser_start_alert.setTimeout(Alert.FOREVER);
+	display.setCurrent( browser_start_alert );
 
-	System.out.println("got device code:"+device_code);
 
-	install_code=InstallHelper.post_http("http://dubwise-download.appspot.com/install_request","device_id="+device_code+"&code="+props.get_code());
+	device_code=InstallHelper.post_http("http://dubwise-download.appspot.com/device_info",canvas.result_as_url_params());
 
+	System.out.println("got device id:"+device_code);
+	System.out.println("download code:"+props.get_code());
+	install_code=InstallHelper.post_http("http://dubwise-download.appspot.com/install_request","device_id="+device_code+"&code="+props.get_code() +"&source="+getAppProperty("DOWNLOAD_SOURCE" ));
+
+
+	System.out.println("got install id:"+install_code);
 
 
 	/*	helper_url=InstallHelper.get_http_string("http://mikrocontroller.cco-ev.de/mikrosvn/Projects/DUBwise/trunk/misc/helper_url") ;
@@ -133,7 +140,8 @@ public class DUBwiseInstaller
 		//		platformRequest((installoption_choice.getSelectedIndex()==1)?getJARURL():getJADURL());
 
 
-		platformRequest("http://dubwise-download.appspot.com/file_sender/"+install_code+((installoption_choice.getSelectedIndex()==1)?".jar":".jad"));
+		System.out.println("open browser with url http://dubwise-download.appspot.com/midlet_download/"+install_code+((installoption_choice.getSelectedIndex()==1)?".jar":".jad"));
+		platformRequest("http://dubwise-download.appspot.com/midlet_download/"+install_code+((installoption_choice.getSelectedIndex()==1)?".jar":".jad"));
 
 	    }
 	catch ( Exception e) {} 
@@ -143,19 +151,11 @@ public class DUBwiseInstaller
     }
     
 
-
-
-
-
     public void canvas_hw_detect_finish() 
     { 
 
-
-	System.out.println("building props");
-
 	props=new DUBwiseProps();
 	props.set_res_by_screensize(canvas.canvas_width,canvas.canvas_height);
-
 
 	props.bluetooth=canvas.bluetooth;
 	props.jsr179=canvas.jsr179;
@@ -200,17 +200,8 @@ public class DUBwiseInstaller
 
 	expert_form.append(device_features_choice);
 
-
-
-
-
 	System.out.println("install build");
 	/* Install form */
-
-
-
-
-
 
 	optional_features_choice = new ChoiceGroup(
 						 "Optional Features ",
@@ -264,21 +255,17 @@ public class DUBwiseInstaller
 
 	sound_choice.setSelectedIndex(props.sound_select,true);
 
-
-
-
 	install_form.append(installmethod_choice);
 	install_form.append(installoption_choice);
 
 	installoptions_form.append(optional_features_choice);
 	installoptions_form.append(firmware_choice);
 
-
 	installoptions_form.append(sound_choice);
-
 
 	ok_command=new Command("OK", Command.OK, 1);
 	back_command=new Command("Back", Command.BACK, 2);
+	exit_command=new Command("Exit", Command.EXIT, 3);
 	
 	expert_form.addCommand(ok_command);
 	expert_form.addCommand(back_command);
@@ -288,7 +275,7 @@ public class DUBwiseInstaller
 
 
 	install_form.addCommand(ok_command);
-	install_form.addCommand(back_command);
+	install_form.addCommand(exit_command);
 
 	// set this class as the command listener
 	installoptions_form.setCommandListener(this);
@@ -296,7 +283,7 @@ public class DUBwiseInstaller
 	expert_form.setCommandListener(this);
 
 
-
+	
 	if (!canvas.bluetooth)
 	    {
 		
@@ -307,7 +294,7 @@ public class DUBwiseInstaller
 		display.setCurrent( myAlert,install_form );
 	    }
 	else
-	    display.setCurrent( install_form );
+	display.setCurrent( install_form );
     }
 
 
@@ -330,9 +317,7 @@ public class DUBwiseInstaller
     {
 	
 	Alert myAlert = new Alert("Install Code", "The install code is:" + props.get_code(), null, AlertType.INFO);
-
 	myAlert.setTimeout(Alert.FOREVER);
-		
 	display.setCurrent( myAlert,install_form );
 
     }
@@ -415,9 +400,14 @@ public class DUBwiseInstaller
 			    {
 			    case INSTALLOPTIONID_DEFAULT:
 				firmware_choice.setSelectedIndex(0,true);
-				sound_choice.setSelectedIndex(1,true);
-				
-				
+				if (canvas.sound_prober.mp3_32kbit_ok)
+				    sound_choice.setSelectedIndex(1,true);
+				else if (canvas.sound_prober.mp3_64kbit_ok)
+				    sound_choice.setSelectedIndex(2,true);
+				else if (canvas.sound_prober.wav_ok)
+				    sound_choice.setSelectedIndex(3,true);
+				else
+				    sound_choice.setSelectedIndex(0,true);
 
 				process_edit_form();
 				break;
@@ -434,8 +424,16 @@ public class DUBwiseInstaller
 				break;
 				
 
-			    case INSTALLOPTIONID_CUSTOM:
 			    case INSTALLOPTIONID_EXPERT:
+
+			        device_info_form= new Form("Device Information");
+				device_info_form.append(new StringItem("", canvas.result_as_text(),Item.PLAIN));
+				device_info_form.addCommand(ok_command);
+				device_info_form.setCommandListener(this);
+				display.setCurrent( device_info_form);
+				break;
+			    case INSTALLOPTIONID_CUSTOM:
+
 				display.setCurrent(installoptions_form);
 				break;
 			    }
@@ -457,6 +455,8 @@ public class DUBwiseInstaller
 		    }
 		else  if (dis==expert_form) 
 		    process_edit_form();
+		else if (dis==device_info_form)
+		    display.setCurrent(installoptions_form);
 		break;
 	    }
 
