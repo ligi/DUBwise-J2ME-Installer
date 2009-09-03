@@ -13,6 +13,8 @@ public class SoundProber implements Runnable
 
     public boolean probing_done=false;
 
+    public String protocol_types="";
+
     // constructor
     public SoundProber()
     {
@@ -40,6 +42,14 @@ public class SoundProber implements Runnable
     // thread
     public void run()
     {
+	String types[] = Manager.getSupportedContentTypes(null);
+	for (int i = 0; i < types.length; i++) {
+	    String protocols[] =Manager.getSupportedProtocols(types[i]);
+	    for (int ii = 0; ii < protocols.length; ii++) {
+		protocol_types+=types[i]+" : " + protocols[ii] + "\n";
+	    }
+	}
+
 	wav_ok=probe_sound("snd.wav","x-wav");
 	mp3_16kbit_ok=probe_sound("snd_16kbit.mp3","mp3");
 	mp3_32kbit_ok=probe_sound("snd_32kbit.mp3","mp3");

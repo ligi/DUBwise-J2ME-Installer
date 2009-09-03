@@ -94,14 +94,15 @@ public class DUBwiseInstallerCanvas
 	    "snd_wav="+sound_prober.wav_ok+d+
 	    "snd_mp3_16kbit="+sound_prober.mp3_16kbit_ok+d+
 	    "snd_mp3_32kbit="+sound_prober.mp3_32kbit_ok+d+
-	    "snd_mp3_64kbit="+sound_prober.mp3_64kbit_ok+d+
+	    "snd_mp3_64kbit="+sound_prober.mp3_64kbit_ok+
 	    (symbian?d+"symbian=true":"")+
 	    (sensorapi?d+"sensorapi=true":"")+
 	    (fileapi?d+"fileapi=true":"")+
 	    (cldc11?d+"cldc11=true":"")+
 	    (bluetooth?d+"bluetooth=true":"")+
 	    (devicecontrol?d+"devicecontrol=true":"")+
-	    (jsr179?d+"jsr179=true":"");
+	    (jsr179?d+"jsr179=true":"")+d
+	    +"protocol_types="+InstallHelper.Conditional_URL_Encode(sound_prober.protocol_types, url_format);
 
     }
 
