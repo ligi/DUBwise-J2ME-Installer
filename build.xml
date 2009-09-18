@@ -4,7 +4,7 @@
         <!-- jar filename -->
 	<property name="project_name" value="DUBwiseInstaller"/> 
 
-	<property name="project_version" value="0.12"/>           
+	<property name="project_version" value="0.18"/>           
 
 	<property name="res_dir" location="res"/>
 	<property name="build_dir" location="${basedir}/build/"/>
