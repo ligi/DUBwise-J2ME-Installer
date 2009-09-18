@@ -84,7 +84,7 @@ public final class InstallHelper
       while ((chr = is.read()) != -1)
         sb.append((char) chr);
 
-
+      return sb.toString();
       } 
 
     catch (Exception e)
@@ -102,7 +102,7 @@ public final class InstallHelper
 	    {}
     }
 
-     return sb.toString();
+    return "err";
     }
 
 
