@@ -19,7 +19,11 @@ public class DUBwiseInstaller
     implements Runnable,CommandListener
 {
 
-
+    public final static byte VERSION_MINOR = 18;
+    public final static byte VERSION_MAJOR = 0;
+    
+    public final static String VERSION_STR = ""+VERSION_MAJOR+"."+VERSION_MINOR;
+    
     public String[] installmethod_strings={"online Install","Download JAR","show Install Code"};
     public String[] installoption_strings={"default","full featured","minimal","custom","expert"};
 
@@ -100,51 +104,45 @@ public class DUBwiseInstaller
 	    return download_url+props.installsrc_str()+"/"+props.getJADFileName();
     }
 
-    public boolean url_check()
-    {
-	return (InstallHelper.get_http_string(getJADURL()).startsWith("MIDlet-Jar-URL:"));
-    }
     // fire up browser for online install
     public void run()
     {
-	Alert browser_start_alert = new Alert("Information", "opening browser - please wait", null, AlertType.INFO);
-
-	browser_start_alert.setTimeout(Alert.FOREVER);
-	display.setCurrent( browser_start_alert );
-
-
+	System.out.println("trying to get device id");
 	device_code=InstallHelper.post_http("http://dubwise-download.appspot.com/device_info",canvas.result_as_url_params());
-
 	System.out.println("got device id:"+device_code);
-	System.out.println("download code:"+props.get_code());
-	install_code=InstallHelper.post_http("http://dubwise-download.appspot.com/install_request","device_id="+device_code+"&code="+props.get_code() +"&source="+getAppProperty("DOWNLOAD_SOURCE" ));
 
-
-	System.out.println("got install id:"+install_code);
-
-
-	/*	helper_url=InstallHelper.get_http_string("http://mikrocontroller.cco-ev.de/mikrosvn/Projects/DUBwise/trunk/misc/helper_url") ;
-	http_possible=((!helper_url.equals("err")));
-	download_url=InstallHelper.get_http_string("http://mikrocontroller.cco-ev.de/mikrosvn/Projects/DUBwise/trunk/misc/installer_meta/dl_url") ;
-	
-	if ((download_url==null) || (!download_url.startsWith("http")))
-	    download_url=helper_url+"dl/";
-	*/
-
-	//	if (http_possible) System.out.println(InstallHelper.get_http_string(helper_url+"mail?subject=DUBwiseInstallGJ&text="+InstallHelper.urlEncode( "Installer Version: 0.8 \nDownload Source:" +getAppProperty("DOWNLOAD_SOURCE")+ "  \nDownload URL:" + getJADURL() + "\nDownload OK:" + url_check()+ "\nInstall Options:" + installoption_strings[installoption_choice.getSelectedIndex()] + "\n\n------Device Infos---\n" + canvas.description_str() +"\n"  )));
-
-	try
+	if ( device_code=="err")
 	    {
-		Thread.sleep(500);
-		
-		//		platformRequest((installoption_choice.getSelectedIndex()==1)?getJARURL():getJADURL());
-
-
-		System.out.println("open browser with url http://dubwise-download.appspot.com/midlet_download/"+install_code+((installoption_choice.getSelectedIndex()==1)?".jar":".jad"));
-		platformRequest("http://dubwise-download.appspot.com/midlet_download/"+install_code+((installoption_choice.getSelectedIndex()==1)?".jar":".jad"));
-
+		Alert browser_start_alert = new Alert("Error", "Network Error", null, AlertType.ERROR);
+		browser_start_alert.setTimeout(Alert.FOREVER);
+		display.setCurrent( browser_start_alert );
 	    }
-	catch ( Exception e) {} 
+	else
+	    {
+		Alert browser_start_alert = new Alert("Information", "opening browser - please wait", null, AlertType.INFO);
+		browser_start_alert.setTimeout(Alert.FOREVER);
+		display.setCurrent( browser_start_alert );
+
+		System.out.println("download code:"+props.get_code());
+		install_code=InstallHelper.post_http("http://dubwise-download.appspot.com/install_request","device_id="+device_code+"&code="+props.get_code() +"&source="+getAppProperty("DOWNLOAD_SOURCE" ) + "&installer_version="+VERSION_STR + "&installoption="+installoption_strings[installoption_choice.getSelectedIndex()]);
+		
+		System.out.println("got install id:"+install_code);
+
+		try
+		    {
+			Thread.sleep(500);
+			String browser_url="http://dubwise-download.appspot.com/midlet_download/"+install_code;
+			if ((installmethod_choice.getSelectedIndex()==1))
+			    browser_url+=".jar";
+			else
+			    browser_url+=".jad";
+
+			System.out.println("open browser with url: " + browser_url);
+			platformRequest(browser_url);
+			
+		    }
+		catch ( Exception e) {} 
+	    }
 	
 	notifyDestroyed(); //quit
 
