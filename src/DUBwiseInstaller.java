@@ -107,13 +107,42 @@ public class DUBwiseInstaller
     // fire up browser for online install
     public void run()
     {
-	System.out.println("trying to get device id");
-	device_code=InstallHelper.post_http("http://dubwise-download.appspot.com/device_info",canvas.result_as_url_params());
-	System.out.println("got device id:"+device_code);
+	int device_id=-1;
+	boolean network_error=false;
+	boolean appengine_error=false;
 
-	if ( device_code=="err")
+	int attempt=0;
+
+	while ((device_id==-1)&&(attempt<5)) {
+	
+	    attempt++;
+
+	    System.out.println("trying to get device id");
+	    device_code=InstallHelper.post_http("http://dubwise-download.appspot.com/device_info",canvas.result_as_url_params());
+
+	    try {
+		device_id=Integer.parseInt(device_code);
+	    }
+	    catch(Exception e) { 
+		appengine_error|=true;
+	    }
+
+	    System.out.println("got device id:"+device_code);
+
+	    network_error|= ( device_code=="err");
+
+	}
+
+	if ( device_id==-1)
 	    {
-		Alert browser_start_alert = new Alert("Error", "Network Error", null, AlertType.ERROR);
+		String error_str="";
+		if (network_error)
+		    error_str+="Network error - check your Network ";
+
+		if (appengine_error)
+		    error_str+="Appengine Error - Contact LiGi";
+
+		Alert browser_start_alert = new Alert("Error getting Device Code", error_str, null, AlertType.ERROR);
 		browser_start_alert.setTimeout(Alert.FOREVER);
 		display.setCurrent( browser_start_alert );
 	    }
@@ -124,11 +153,47 @@ public class DUBwiseInstaller
 		display.setCurrent( browser_start_alert );
 
 		System.out.println("download code:"+props.get_code());
-		install_code=InstallHelper.post_http("http://dubwise-download.appspot.com/install_request","device_id="+device_code+"&code="+props.get_code() +"&source="+getAppProperty("DOWNLOAD_SOURCE" ) + "&installer_version="+VERSION_STR + "&installoption="+installoption_strings[installoption_choice.getSelectedIndex()]);
-		
-		System.out.println("got install id:"+install_code);
 
-		try
+		attempt=0;
+		int install_id=-1;
+
+		network_error=false;
+		appengine_error=false;
+
+		while ((device_id==-1)&&(attempt<5)) {
+	
+		    attempt++;
+
+		    install_code=InstallHelper.post_http("http://dubwise-download.appspot.com/install_request","device_id="+device_code+"&code="+props.get_code() +"&source="+getAppProperty("DOWNLOAD_SOURCE" ) + "&installer_version="+VERSION_STR + "&installoption="+installoption_strings[installoption_choice.getSelectedIndex()]);
+
+
+		    try {
+			install_id=Integer.parseInt(install_code);
+		    }
+		    catch(Exception e) { 
+			appengine_error|=true;
+		    }
+
+		    network_error|= (install_code=="err");
+		
+		    System.out.println("got install id:"+install_code);
+		}
+
+
+		if ( install_id==-1)
+		    {
+			String error_str="";
+			if (network_error)
+			    error_str+="Network error - check your Network ";
+
+			if (appengine_error)
+			    error_str+="Appengine Error - Contact LiGi";
+
+			browser_start_alert = new Alert("Error getting Install Code", error_str, null, AlertType.ERROR);
+			browser_start_alert.setTimeout(Alert.FOREVER);
+			display.setCurrent( browser_start_alert );
+		    }
+		else	try
 		    {
 			Thread.sleep(500);
 			String browser_url="http://dubwise-download.appspot.com/midlet_download/"+install_code;
