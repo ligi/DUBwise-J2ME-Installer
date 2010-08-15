@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+#
+#
+# Deploy script for DUBwise
+# (cc) 2009 Marcus -Ligi- Bueschleb
+# mail to ligi attttt ligi dotttt de
+#
+#
+
+require 'net/scp'
+require 'highline/import'
+
+host='bluepill.freestone.net'
+user="ligi"
+
+path="/var/www/users/ligi/htdocs"
+
+
+start_time=Time.now
+
+  p "uploading"
+Net::SCP.start(host, user) do |scp|
+  scp.upload!("bin/DUBwiseInstaller.jar" , "#{path}/DUBwiseInstaller.jar")
+  scp.upload!("bin/DUBwiseInstaller.jad" , "#{path}/DUBwiseInstaller.jad")
+  # version
+end
+
+
+puts "finished in" + Time.at(Time.now - start_time).gmtime.strftime("%R:%S")
